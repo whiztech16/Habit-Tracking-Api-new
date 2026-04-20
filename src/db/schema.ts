@@ -1,13 +1,14 @@
 import {
-    pgTable,
-    uuid,
-    varchar,
-    text,
-    timestamp,
-    boolean,
-    integer,
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  timestamp,
+  boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema, } from 'drizzle-zod'
 
 // users table
 export const users = pgTable('users', {
@@ -58,7 +59,7 @@ export const tags = pgTable('tags', {
 });
 
 // habits_tags junction table (many-to-many)
-export const habitsTags = pgTable('habits_tags', {
+export const habitTags = pgTable('habit_tags', {
   id: uuid('id').primaryKey().defaultRandom(),
   habitId: uuid('habit_id')
     .references(() => habits.id, { onDelete: 'cascade' })
@@ -68,3 +69,49 @@ export const habitsTags = pgTable('habits_tags', {
     .notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
+// Relation between users and habits
+// users can have many habits 
+export const userRelations = relations(users, ({ many }) => ({
+  habits: many(habits),
+}));
+
+export const habitRelations = relations(habits, ({ one, many }) => ({
+  user: one(users, {
+    fields: [habits.userId],
+    references: [users.id],
+  }),
+  entries: many(entries),
+  habitTags: many(habitTags),
+}));
+
+export const entryRelations = relations(entries, ({ one }) => ({
+  habit: one(habits, {
+    fields: [entries.habitId],
+    references: [habits.id],
+  }),
+}));
+
+export const tagRelations = relations(tags, ({ many }) => ({
+  habitTags: many(habitTags),
+}));
+
+export const habitTagsRelations = relations(habitTags, ({ one }) => ({
+  habit: one(habits, {
+    fields: [habitTags.habitId],
+    references: [habits.id],
+  }),
+  tag: one(tags, {
+    fields: [habitTags.tagId],
+    references: [tags.id],
+  }),
+}));
+export type user = typeof users.$inferSelect;
+export type Habit = typeof habits.$inferSelect;
+export type Entry = typeof entries.$inferSelect;
+export type Tag = typeof tags.$inferSelect;
+export type HabitTag = typeof habitTags.$inferSelect;
+
+export const insertUserSchema = createInsertSchema(users);
+
+
+export const selectUserSchema = createSelectSchema(users);

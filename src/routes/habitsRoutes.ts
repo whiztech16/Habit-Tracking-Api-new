@@ -6,10 +6,10 @@ import {createHabit, getUserHabits, updateHabit} from '../controllers/habitcontr
 
 const createHabitSchema = z.object({
     name: z.string().min(3, 'Habit name must be at least 3 characters long'),
-    description: z.string().min(3, 'Habit description must be at least 3 characters long'),
-frequency: z.string(),
-targetCount :z.string(),
-tagIds:z.array(z.string()).optional()
+    description: z.string().min(3, 'Habit description must be at least 3 characters long').optional(),
+    frequency: z.string(),
+    targetCount: z.number().int().positive().optional(),
+    tagIds: z.array(z.string()).optional()
 });
 
 const completeParamsSchema = z.object({

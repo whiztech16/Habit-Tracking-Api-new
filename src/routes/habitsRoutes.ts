@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import { ValidateBody, ValidateParams } from '../middleware/validation.ts';
+import { authenticateToken } from '../middleware/auth.ts';
 import z from 'zod';
+import {createHabit, getUserHabits, updateHabit} from '../controllers/habitcontrollers.ts'
 
 const createHabitSchema = z.object({
     name: z.string().min(3, 'Habit name must be at least 3 characters long'),
     description: z.string().min(3, 'Habit description must be at least 3 characters long'),
+frequency: z.string(),
+targetCount :z.string(),
+tagIds:z.array(z.string()).optional()
 });
 
 const completeParamsSchema = z.object({
@@ -14,20 +19,17 @@ const completeParamsSchema = z.object({
 const completeBodySchema = z.object({
     completed: z.boolean().optional(),
 });
-
+ 
 const router = Router();
+router.use(authenticateToken)
 
-router.get('/', (req, res) => {
-    res.status(200).json({ message: 'Habits' });
-});
-
+router.get('/', getUserHabits);
+router.patch('/:id',updateHabit)
 router.get('/:id', (req, res) => {
     res.status(200).json({ message: 'Got one habit by id' });
 });
 
-router.post('/', ValidateBody(createHabitSchema), (req, res) => {
-    res.status(201).json({ message: 'Habit created' });
-});
+router.post('/', ValidateBody(createHabitSchema), createHabit);
 
 router.delete('/:id', (req, res) => {
     res.status(200).json({ message: 'Habit deleted' });

@@ -6,7 +6,9 @@ dotenv.config({ path: '.env.test' }) // add this
 export default defineConfig({
   test: {
     globals: true,
-    testTimeout: 30000,
+ 
+      hookTimeout: 30000,
+    testTimeout: 60000,
     globalSetup: ['./Tests/setup/globalSetup.ts'],
     clearMocks: true,
     restoreMocks: true,

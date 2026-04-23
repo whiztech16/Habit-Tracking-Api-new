@@ -12,12 +12,7 @@ const createPool = () => {
 }
 
 
-let client 
-if (isProd()){
-    client =createPool()
-}else{
-    client = remember("dbpool",()=> createPool())
-    
-}
+export const client = isProd() ? createPool() : remember("dbpool", () => createPool())
+
 export const db = drizzle({client,schema})
-export default db 
+export default db
